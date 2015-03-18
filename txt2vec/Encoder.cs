@@ -68,6 +68,7 @@ namespace Txt2Vec
 
         void InitAccTermFreq()
         {
+            Console.WriteLine("Initializing acculumate term frequency...");
             accFreqTable = new int[vocab_size];
             accTotalFreq = 0;
 
@@ -82,6 +83,8 @@ namespace Txt2Vec
                 accFreqTable[i] = accTotalFreq;
                 i++;
             }
+
+            Console.WriteLine("Acculumated total frequency : {0}", accTotalFreq);
         }
 
         int SearchAccTermTable(int freq)
@@ -295,6 +298,10 @@ namespace Txt2Vec
                         }
 
                         train_words++;
+                        if (debug_mode > 0 && train_words % 1000000 == 0)
+                        {
+                            Console.Write("{0}M... ", train_words / 1000000);
+                        }
                     }
                 }
             }
