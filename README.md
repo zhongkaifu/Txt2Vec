@@ -1,5 +1,5 @@
-# Project Description
- Txt2Vec is a toolkit to represent text by vector. It's based on Google's word2vec project.
+# Txt2Vec
+Txt2Vec is a toolkit to represent text by vector. It's based on Google's word2vec project.
 
 For a specified term, phrase or sentence, Txt2vec is able to generate correpsonding vector according its semantics in text. And each value in the vector represents a dimension of feature. So for different text, Txt2vec can calculate their similarity by score in vectors. 
 
