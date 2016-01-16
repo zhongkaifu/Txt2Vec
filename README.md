@@ -15,8 +15,8 @@ Txt2VecConsole.exe
 <distance> : calculating the similarity between two words  
 <analogy> : multi-words semantic analogy  
 <shrink> : shrink down the size of model  
-<dump> : dump model to text format
-<buildvq> : build vector quantization model in text format
+<dump> : dump model to text format  
+<buildvq> : build vector quantization model in text format  
 
 # Train model
 With train mode, you can train a word-vector model from given corpus. Note that, before you train the model, the words in training corpus should be word broken. The following are parameters for training mode
@@ -120,17 +120,17 @@ Txt2VecConsole.exe -mode shrink <...>
 **-dictfile** <file> : lexical dictionary. Any words with its vector isn't in the dictionary will be filter out from the model  
 
 # Dump model
-Binary model format is not friendly for human to investigation, so Txt2VecConsole provides a command to dump binary model into text format. The command line as follows:
+Binary model format is not friendly for human to investigation, so Txt2VecConsole provides a command to dump binary model into text format. The command line as follows:  
 
-Txt2VecConsole.exe -mode dump <...>
- Parameters to dump encoded model to text format
-**-modelfile** <file> : encoded binary model needs to be dumped.
-**-txtfile** <file> : dumped model in text format
+Txt2VecConsole.exe -mode dump <...>  
+ Parameters to dump encoded model to text format  
+**-modelfile** <file> : encoded binary model needs to be dumped.  
+**-txtfile** <file> : dumped model in text format  
 
 # Build vector quantization model
-model vector quantization is another way to reduce model size by converting weights from float type to byte type. Currently, Txt2VecConsole supports model vector quantization in 8bits. That means the model size will be reduced to 1/4 original model size. The command line as follows:
+model vector quantization is another way to reduce model size by converting weights from float type to byte type. Currently, Txt2VecConsole supports model vector quantization in 8bits. That means the model size will be reduced to 1/4 original model size. The command line as follows:  
 
-Txt2VecConsole.exe -mode buildvq <...>
- Parameters to build vector quantization model
-**-modelfile** <file> : encoded model file for vector quantization
-**-vqmodelfile** <file> : output vector quantized model
+Txt2VecConsole.exe -mode buildvq <...>  
+ Parameters to build vector quantization model  
+**-modelfile** <file> : encoded model file for vector quantization  
+**-vqmodelfile** <file> : output vector quantized model  
