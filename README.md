@@ -19,7 +19,7 @@ Txt2VecConsole.exe
 <buildvq> : build vector quantization model in text format  
 
 # Train model
-With train mode, you can train a word-vector model from given corpus. Note that, before you train the model, the words in training corpus should be word broken. The following are parameters for training mode
+With train mode, you can train a word-vector model from given corpus. Note that, before you train the model, the words in training corpus should be word broken. The following are parameters for training mode  
 
 Txt2VecConsole.exe -mode train <...>  
  Parameters for training:  
