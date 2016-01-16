@@ -108,7 +108,53 @@ Word Cosine distance
 岫玉 0.797258011387281  
 发晶 0.797202309084502  
 
-You can get demo package for Chinese in [DOWNLOADS] section.  
+Here is another example in English  
+Enter word or sentence (EXIT to break):  
+movie  
+Word                       Cosine distance  
+------------------------------------------  
+movie   1  
+film    0.885520313665965  
+documentary     0.724328882031764  
+comedy  0.697010992360393  
+miniseries      0.652796205327335  
+drama   0.650902800673727  
+sitcom  0.644413129252032  
+thriller        0.641292610371391  
+flick   0.632148128715013  
+biopic  0.62797525376413  
+cartoon 0.614410306167449  
+song    0.603244724945496  
+cinema  0.600059867125111  
+novel   0.593261651356445  
+book    0.58715568070338  
+videogame       0.585597784043403  
+telenovela      0.58538938018449  
+slasher 0.583017049013312  
+blockbuster     0.581119239625672  
+mockumentary    0.579500814540811  
+musical 0.577718414766068  
+trilogy 0.574577268735197  
+bollywood       0.569893531890232  
+docudrama       0.569531770871584  
+horror  0.569438628440912  
+featurette      0.569255166345126  
+telemovie       0.562765328136319  
+superhero       0.553818777268347  
+movies  0.551023619845223  
+story   0.543996823998135  
+vampire 0.542279925338312  
+spoof   0.539076773599035  
+theatrical      0.535893238188445  
+episode 0.535772427953206  
+melodrama       0.53513161843853  
+storyline       0.534828090692405  
+anime   0.530182484977031  
+script  0.528789220176914  
+comic   0.52776622526002  
+animated        0.526917090929355  
+
+You can get demo package in release section.  
 
 # Shrink model
 Sometimes, the size of encoded model maybe too big, so you can use shrink mode to reduce its size according a given lexical dictionary. In shrink mode, any words with its vectors will be filter out if the word isn't in the given lexical dictionary. Here is the usage  
