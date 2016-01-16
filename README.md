@@ -64,7 +64,7 @@ Txt2VecConsole.exe -mode distance <...>
  After the model is loaded, you can input a word from console and then the tool will return the Top-N most similar words. Here is an example:  
 Txt2VecConsole.exe -mode distance -modelfile wordvec.bin  
  Enter word or sentence (EXIT to break):  
-手串  
+**手串**  
 Word Cosine distance  
  -----------------------------------------------------------------------------  
 手串 1  
@@ -110,9 +110,9 @@ Word Cosine distance
 
 Here is another example in English  
 Enter word or sentence (EXIT to break):  
-movie  
-Word                       Cosine distance  
-------------------------------------------  
+**movie**  
+Word Cosine distance  
+ -----------------------------------------------------------------------------  
 movie   1  
 film    0.885520313665965  
 documentary     0.724328882031764  
