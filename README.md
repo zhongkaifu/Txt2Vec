@@ -15,6 +15,8 @@ Txt2VecConsole.exe
 <distance> : calculating the similarity between two words  
 <analogy> : multi-words semantic analogy  
 <shrink> : shrink down the size of model  
+<dump> : dump model to text format
+<buildvq> : build vector quantization model in text format
 
 # Train model
 With train mode, you can train a word-vector model from given corpus. Note that, before you train the model, the words in training corpus should be word broken. The following are parameters for training mode
@@ -26,7 +28,7 @@ Txt2VecConsole.exe -mode train <...>
 **-vector-size** <int> : Set size of word vectors; default is 200  
 **-window** <int> : Set max skip length between words; default is 5  
 **-sample** <float> : Set threshold for occurrence of words. Those that appear with higher frequency in the training data will be randomly down-sampled; default is 0 (off), useful value is 1e-5  
-**-threads** <int> : Use <int> threads (default 1)  
+**-threads** <int> : the number of threads (default 1)  
 **-min-count** <int> : This will discard words that appear less than <int> times; default is 5  
 **-alpha** <float> : Set the starting learning rate; default is 0.025  
 **-debug** <int> : Set the debug mode (default = 2 = more info during training)  
@@ -56,8 +58,8 @@ Incremental model training is very useful for incremental corpus and new word. I
 With distance mode, you are able to calculate the similarity between two words. Here are parameters for this mode
 Txt2VecConsole.exe -mode distance <...>  
  Parameters for calculating word similarity  
-**-modelfile** <file> : Use <file> to load encoded model  
-**-maxword** <int> : <int> the maximum word number in result. Default is 40  
+**-modelfile** <file> : encoded model needs to be loaded  
+**-maxword** <int> : the maximum word number in result. Default is 40  
 
  After the model is loaded, you can input a word from console and then the tool will return the Top-N most similar words. Here is an example:  
 Txt2VecConsole.exe -mode distance -modelfile wordvec.bin  
@@ -113,6 +115,22 @@ Sometimes, the size of encoded model maybe too big, so you can use shrink mode t
 
 Txt2VecConsole.exe -mode shrink <...>  
  Parameters for shrinking down model  
-**-modelfile** <file> : <file> is the raw model for shrinking down  
-**-newmodelfile** <file> : <file> is the shrinked model  
-**-dictfile** <file> : <file> is the lexical dictionary. Any words with its vector isn't in the dictionary will be filter out from the model  
+**-modelfile** <file> : encoded model for shrinking down  
+**-newmodelfile** <file> : shrinked model  
+**-dictfile** <file> : lexical dictionary. Any words with its vector isn't in the dictionary will be filter out from the model  
+
+# Dump model
+Binary model format is not friendly for human to investigation, so Txt2VecConsole provides a command to dump binary model into text format. The command line as follows:
+
+Txt2VecConsole.exe -mode dump <...>
+ Parameters to dump encoded model to text format
+**-modelfile** <file> : encoded binary model needs to be dumped.
+**-txtfile** <file> : dumped model in text format
+
+# Build vector quantization model
+model vector quantization is another way to reduce model size by converting weights from float type to byte type. Currently, Txt2VecConsole supports model vector quantization in 8bits. That means the model size will be reduced to 1/4 original model size. The command line as follows:
+
+Txt2VecConsole.exe -mode buildvq <...>
+ Parameters to build vector quantization model
+**-modelfile** <file> : encoded model file for vector quantization
+**-vqmodelfile** <file> : output vector quantized model
