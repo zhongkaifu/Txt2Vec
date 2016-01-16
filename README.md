@@ -1,5 +1,5 @@
 # Txt2Vec
-Txt2Vec is a toolkit to represent text by vector. It's based on Google's word2vec project, but with some new features. For a specified term, phrase or sentence, Txt2vec is able to generate correpsonding vector according its semantics in text. And each dimension of the vector represents a feature. 
+Txt2Vec is a toolkit to represent text by vector. It's based on Google's word2vec project, but with some new features, such incremental training, model vector quantization and so on. For a specified term, phrase or sentence, Txt2vec is able to generate correpsonding vector according its semantics in text. And each dimension of the vector represents a feature. 
 
 Txt2Vec is based on neural network for model encoding and cosine distance for terms similarity. Furthermore, Txt2Vec has fixed some issues of word2vec when encoding model in multiple-threading environment.
 
