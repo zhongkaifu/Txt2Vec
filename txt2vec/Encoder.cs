@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
+using AdvUtils;
 
 namespace Txt2Vec
 {
@@ -68,13 +69,13 @@ namespace Txt2Vec
 
         void InitAccTermFreq()
         {
-            Console.WriteLine("Initializing acculumate term frequency...");
+            Logger.WriteLine("Initializing acculumate term frequency...");
             accFreqTable = new int[vocab_size];
             accTotalFreq = 0;
 
             //Keep accTotalFreq is less than int.MaxValue
             accFactor = 1 + (int)(train_words / int.MaxValue);
-            Console.WriteLine("Acculumate factor: {0}", accFactor);
+            Logger.WriteLine("Acculumate factor: {0}", accFactor);
 
             int i = 0;
             foreach (vocab_word word in vocab)
@@ -84,7 +85,7 @@ namespace Txt2Vec
                 i++;
             }
 
-            Console.WriteLine("Acculumated total frequency : {0}", accTotalFreq);
+            Logger.WriteLine("Acculumated total frequency : {0}", accTotalFreq);
         }
 
         int SearchAccTermTable(int freq)
@@ -184,11 +185,11 @@ namespace Txt2Vec
 
         void LoadPreTrainModelSyn(string strModelFileName, double[] syn)
         {
-            Decoder preTrainedModel = new Decoder();
+            Model preTrainedModel = new Model();
             preTrainedModel.LoadModel(strModelFileName, false);
 
 
-            if (preTrainedModel.GetVectorSize() != layer1_size)
+            if (preTrainedModel.VectorSize != layer1_size)
             {
                 throw new Exception("The layer size is inconsistent between given parameter and pre-trained model.");
             }
@@ -214,12 +215,12 @@ namespace Txt2Vec
 
         void LoadVocabFromPreTrainModel(string strModelFileName)
         {
-            Decoder preTrainedModel = new Decoder();
+            Model preTrainedModel = new Model();
             preTrainedModel.LoadModel(strModelFileName, false);
 
-            layer1_size = preTrainedModel.vectorSize;
-            Console.WriteLine("Apply the following options from pr-trained model file {0}", preTrainedModel);
-            Console.WriteLine("Vector Size: {0}", layer1_size);
+            layer1_size = preTrainedModel.VectorSize;
+            Logger.WriteLine("Apply the following options from pr-trained model file {0}", preTrainedModel);
+            Logger.WriteLine("Vector Size: {0}", layer1_size);
 
             string[] allTerms = preTrainedModel.GetAllTerms();
             foreach (string strTerm in allTerms)
@@ -300,7 +301,7 @@ namespace Txt2Vec
                         train_words++;
                         if (debug_mode > 0 && train_words % 1000000 == 0)
                         {
-                            Console.Write("{0}M... ", train_words / 1000000);
+                            Logger.WriteLine("{0}M... ", train_words / 1000000);
                         }
                     }
                 }
@@ -328,7 +329,7 @@ namespace Txt2Vec
                     train_words++;
                     if (debug_mode > 0 && train_words % 1000000 == 0)
                     {
-                        Console.Write("{0}M... ", train_words / 1000000);
+                        Logger.WriteLine("{0}M... ", train_words / 1000000);
                     }
 
                     i = SearchVocab(word);
@@ -428,7 +429,7 @@ namespace Txt2Vec
                             sumErr += (totalNeu_e[i] / word_count_actual);
                         }
 
-                        Console.WriteLine("Alpha: {0:0.0000}  Prog: {1:0.00}% Words: {2}K Sent: {3}K Error: {4}", alpha,
+                        Logger.WriteLine("Alpha: {0:0.0000}  Prog: {1:0.00}% Words: {2}K Sent: {3}K Error: {4}", alpha,
                          word_count_actual / (double)(iter * train_words + 1) * 100, word_count_actual / 1024, sentence_count / 1024, sumErr);
                     }
 
@@ -439,13 +440,11 @@ namespace Txt2Vec
                         {
                             if (old_next_save_trained_words == next_save_trained_words)
                             {
-                                Console.Write("Saving temporary word vector into file...");
+                                Logger.WriteLine("Saving temporary word vector into file...");
 
+                                Model.SaveModel("vector_tmp.bin", vocab_size, layer1_size, vocab, syn0);
+                                Model.SaveModel("vector_tmp_bin.syn1", vocab_size, layer1_size, vocab, syn1);
 
-                                SaveModel("vector_tmp.bin", syn0);
-                                SaveModel("vector_tmp_bin.syn1", syn1);
-
-                                Console.WriteLine("Done.");
                                 next_save_trained_words += next_save_step;
                             }
                         }
@@ -781,39 +780,11 @@ namespace Txt2Vec
             }
         }
 
-        void SaveModel(string strFileName, double [] syn)
-        {
-            StreamWriter fo = new StreamWriter(strFileName);
-            BinaryWriter bw = new BinaryWriter(fo.BaseStream);
-
-            Console.WriteLine("Saving term and vector into model file...");
-            // Save the word vectors
-            bw.Write(vocab_size);
-            bw.Write(layer1_size);
-
-            for (int a = 0; a < vocab_size; a++)
-            {
-                //term string
-                bw.Write(vocab[a].word);
-
-                //term vector
-                for (int b = 0; b < layer1_size; b++)
-                {
-                    bw.Write((float)(syn[a * layer1_size + b]));
-                }
-            }
-
-            bw.Flush();
-            fo.Flush();
-            fo.Close();
-        }
-
-
         public void TrainModel(string train_file, string output_file, string vocab_file)
         {
             if (debug_mode > 0)
             {
-                Console.WriteLine("Starting training using file {0}", train_file);
+                Logger.WriteLine("Starting training using file {0}", train_file);
             }
 
             if ((vocab_file != null && File.Exists(vocab_file) == true) ||
@@ -821,25 +792,25 @@ namespace Txt2Vec
             {
                 if (vocab_file != null && File.Exists(vocab_file) == true)
                 {
-                    Console.WriteLine("Loading vocabulary {0} from file...", vocab_file);
+                    Logger.WriteLine("Loading vocabulary {0} from file...", vocab_file);
                     LoadVocabFromFile(vocab_file);
                 }
 
                 if (strPreTrainedModelFileName != null)
                 {
-                    Console.WriteLine("Load vocabulary from pre-trained model file {0}", strPreTrainedModelFileName);
+                    Logger.WriteLine("Load vocabulary from pre-trained model file {0}", strPreTrainedModelFileName);
                     LoadVocabFromPreTrainModel(strPreTrainedModelFileName);
                 }
 
                 //Vocaburary is loaded from given dict, then we need to calculate how many words need to be train
-                Console.WriteLine("Calculating how many words need to be train...");
+                Logger.WriteLine("Calculating how many words need to be train...");
                 GetTrainWordSize(train_file);
-                Console.WriteLine("Total training words : {0}", train_words);
+                Logger.WriteLine("Total training words : {0}", train_words);
             }
             else
             {
                 //We have no input vocabulary, so we get vocabulary from training corpus
-                Console.WriteLine("Generate vocabulary from training corpus {0}...", train_file);
+                Logger.WriteLine("Generate vocabulary from training corpus {0}...", train_file);
                 LearnVocabFromTrainFile(train_file);
             }
 
@@ -851,13 +822,9 @@ namespace Txt2Vec
             {
                 if (debug_mode > 0)
                 {
-                    Console.Write("Saving vocabulary into file...");
+                    Logger.WriteLine("Saving vocabulary into file...");
                 }
                 SaveVocab(vocab_file);
-                if (debug_mode > 0)
-                {
-                    Console.WriteLine("Done.");
-                }
             }
 
             next_save_step = savestep;
@@ -865,7 +832,7 @@ namespace Txt2Vec
 
             if (output_file == null)
             {
-                Console.WriteLine("No specified output file name");
+                Logger.WriteLine("No specified output file name");
                 return;
             }
             //Initialize neural network
@@ -878,10 +845,10 @@ namespace Txt2Vec
             //Load pre-trained model syn0
             if (strPreTrainedModelFileName != null)
             {
-                Console.WriteLine("Loading syn0 from pre-trained model...");
+                Logger.WriteLine("Loading syn0 from pre-trained model...");
                 LoadPreTrainModelSyn(strPreTrainedModelFileName, syn0);
 
-                Console.WriteLine("Loading syn1 from pre-trained model...");
+                Logger.WriteLine("Loading syn1 from pre-trained model...");
                 LoadPreTrainModelSyn(strPreTrainedModelFileName + ".syn1", syn1);
             }
 
@@ -892,7 +859,7 @@ namespace Txt2Vec
                 {
                     totalNeu_e = new double[layer1_size];
 
-                    Console.WriteLine("Starting training iteration {0}/{1}...", j + 1, iter);
+                    Logger.WriteLine("Starting training iteration {0}/{1}...", j + 1, iter);
                     srTrainCorpus = new StreamReader(strCurTrainFile, Encoding.UTF8, true, 102400000);
                     List<Thread> threadList = new List<Thread>();
                     for (int i = 0; i < num_threads; i++)
@@ -916,18 +883,18 @@ namespace Txt2Vec
                         sumErr += (totalNeu_e[i] / word_count_actual);
                     }
 
-                    Console.WriteLine("Error: {0}", sumErr);
+                    Logger.WriteLine("Error: {0}", sumErr);
                 }
             }
             else
             {
-                Console.WriteLine("Train train file isn't existed.");
+                Logger.WriteLine("Train train file isn't existed.");
                 return;
             }
 
 
-            SaveModel(output_file, syn0);
-            SaveModel(output_file + ".syn1", syn1);
+            Model.SaveModel(output_file, vocab_size, layer1_size, vocab, syn0);
+            Model.SaveModel(output_file + ".syn1", vocab_size, layer1_size, vocab, syn1);
         }
     }
 }

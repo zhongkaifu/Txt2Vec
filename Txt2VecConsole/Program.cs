@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AdvUtils;
 
 namespace Txt2VecConsole
 {
@@ -17,7 +18,7 @@ namespace Txt2VecConsole
                 {
                     if (a == args.Length - 1)
                     {
-                        Console.WriteLine("Argument missing for {0}", str);
+                        Logger.WriteLine("Argument missing for {0}", str);
                         return -1;
                     }
                     return a;
@@ -28,6 +29,8 @@ namespace Txt2VecConsole
 
         static void Main(string[] args)
         {
+            Logger.LogFile = "Txt2VecConsole.log";
+
             if (args.Length == 0)
             {
                 Usage();
@@ -44,7 +47,7 @@ namespace Txt2VecConsole
             if ((i = ArgPos("-mode", args)) >= 0) strRunMode = args[i + 1].ToLower();
             if (strRunMode == null)
             {
-                Console.WriteLine("Failed: must to set running mode by -mode <train/distance>");
+                Logger.WriteLine(Logger.Level.err, "Failed: must to set running mode by -mode <train/distance>");
                 Usage();
                 return;
             }
@@ -65,9 +68,13 @@ namespace Txt2VecConsole
             {
                 DumpMode(args);
             }
+            else if (strRunMode == "buildvq")
+            {
+                BuildVQMode(args);
+            }
             else
             {
-                Console.WriteLine("Failed: mode {0} isn't supported.", strRunMode);
+                Logger.WriteLine(Logger.Level.err, "Failed: mode {0} isn't supported.", strRunMode);
             }
         }
 
@@ -83,14 +90,14 @@ namespace Txt2VecConsole
 
             if (strModelFileName == null)
             {
-                Console.WriteLine("Failed： must to set the model file name");
+                Logger.WriteLine(Logger.Level.err, "Failed： must to set the model file name");
                 UsageShrink();
                 return;
             }
 
             if (strNewModelFileName == null)
             {
-                Console.WriteLine("Failed： must to set the new model file name");
+                Logger.WriteLine(Logger.Level.err, "Failed： must to set the new model file name");
                 UsageShrink();
                 return;
             }
@@ -98,7 +105,7 @@ namespace Txt2VecConsole
 
             if (strDictFileName == null)
             {
-                Console.WriteLine("Failed： must to set the dict file name");
+                Logger.WriteLine(Logger.Level.err, "Failed： must to set the dict file name");
                 UsageShrink();
                 return;
             }
@@ -120,23 +127,51 @@ namespace Txt2VecConsole
 
             if (strModelFileName == null)
             {
-                Console.WriteLine("Failed： must to set the model file name");
+                Logger.WriteLine(Logger.Level.err, "Failed： must to set the model file name");
                 UsageDumpModel();
                 return;
             }
 
             if (strTextFileName == null)
             {
-                Console.WriteLine("Failed： must to set the text file name");
+                Logger.WriteLine(Logger.Level.err, "Failed： must to set the text file name");
                 UsageDumpModel();
                 return;
             }
 
-            Txt2Vec.Decoder decoder = new Txt2Vec.Decoder();
-            decoder.LoadBinaryModel(strModelFileName);
-            decoder.DumpModel(strTextFileName);
+            Txt2Vec.Model model = new Txt2Vec.Model();
+            model.LoadBinaryModel(strModelFileName);
+            model.DumpModel(strTextFileName);
         }
 
+
+
+        private static void BuildVQMode(string[] args)
+        {
+            int i;
+            string strModelFileName = null;
+            string strVQModelFileName = null;
+            if ((i = ArgPos("-modelfile", args)) >= 0) strModelFileName = args[i + 1];
+            if ((i = ArgPos("-vqmodelfile", args)) >= 0) strVQModelFileName = args[i + 1];
+
+            if (strModelFileName == null)
+            {
+                Logger.WriteLine(Logger.Level.err, "Failed： must to set the model file name");
+                UsageVQModel();
+                return;
+            }
+
+            if (strVQModelFileName == null)
+            {
+                Logger.WriteLine(Logger.Level.err, "Failed： must to set the VQ model file name");
+                UsageVQModel();
+                return;
+            }
+
+            Txt2Vec.Model model = new Txt2Vec.Model();
+            model.LoadBinaryModel(strModelFileName);
+            model.BuildVQModel(strVQModelFileName);
+        }
 
         private static void DistanceAnalogyMode(string[] args, string strRunMode)
         {
@@ -152,7 +187,7 @@ namespace Txt2VecConsole
 
             if (strModelFileName == null)
             {
-                Console.WriteLine("Failed: must to set the model file name");
+                Logger.WriteLine(Logger.Level.err, "Failed: must to set the model file name");
                 if (strRunMode == "distance")
                 {
                     UsageDistance();
@@ -165,7 +200,7 @@ namespace Txt2VecConsole
             }
             if (System.IO.File.Exists(strModelFileName) == false)
             {
-                Console.WriteLine("Failed: model file {0} isn't existed.", strModelFileName);
+                Logger.WriteLine(Logger.Level.err, "Failed: model file {0} isn't existed.", strModelFileName);
                 if (strRunMode == "distance")
                 {
                     UsageDistance();
@@ -177,9 +212,10 @@ namespace Txt2VecConsole
                 return;
             }
 
-            Txt2Vec.Decoder decoder = new Txt2Vec.Decoder();
-            decoder.LoadModel(strModelFileName, bTxtFormat);
+            Txt2Vec.Model model = new Txt2Vec.Model();
+            model.LoadModel(strModelFileName, bTxtFormat);
 
+            Txt2Vec.Decoder decoder = new Txt2Vec.Decoder(model);
             while (true)
             {
                 Console.WriteLine("Enter word or sentence (EXIT to break): ");
@@ -353,12 +389,13 @@ namespace Txt2VecConsole
         {
             Console.WriteLine("Txt2VecConsole for Text Distributed Representation");
             Console.WriteLine("Specify the running mode:");
-            Console.WriteLine("\t-mode <train/distance/analogy/shrink/dump>");
-            Console.WriteLine("\t\t<train> is for training model");
-            Console.WriteLine("\t\t<distance> is for calculating word similarity");
-            Console.WriteLine("\t\t<analogy> is for word semantic analogy");
-            Console.WriteLine("\t\t<shrink> is used to shrink down model");
-            Console.WriteLine("\t\t<dump> is used to dump model to text format.");
+            Console.WriteLine("\t-mode <train/distance/analogy/shrink/dump/buildvq>");
+            Console.WriteLine("\t\t<train>: training model");
+            Console.WriteLine("\t\t<distance>: calculating word similarity");
+            Console.WriteLine("\t\t<analogy>: word semantic analogy");
+            Console.WriteLine("\t\t<shrink>: shrink down model");
+            Console.WriteLine("\t\t<dump>: dump model to text format.");
+            Console.WriteLine("\t\t<buildvq>: build vector quantization model in text format");
         }
 
         private static void UsageTrain()
@@ -366,41 +403,38 @@ namespace Txt2VecConsole
             Console.WriteLine("Txt2VecConsole.exe -mode train <...>");
             Console.WriteLine("Parameters for training:");
             Console.WriteLine("\t-trainfile <file>");
-            Console.WriteLine("\t\tUse text data from <file> to train the model");
+            Console.WriteLine("\t\t<file>: training corpus");
             Console.WriteLine("\t-modelfile <file>");
-            Console.WriteLine("\t\tUse <file> to save the resulting word vectors / word clusters");
+            Console.WriteLine("\t\t<file>: encoded model containing word vectors");
             Console.WriteLine("\t-vector-size <int>");
-            Console.WriteLine("\t\tSet vectorSize of word vectors; default is 200");
+            Console.WriteLine("\t\t<int>: vector size; default is 200");
             Console.WriteLine("\t-window <int>");
-            Console.WriteLine("\t\tSet max skip length between words; default is 5");
+            Console.WriteLine("\t\t<int>: word context size; default is 5");
             Console.WriteLine("\t-sample <float>");
-            Console.WriteLine("\t\tSet threshold for occurrence of words. Those that appear with higher frequency");
+            Console.WriteLine("\t\t<float>: threshold for occurrence of words. Those that appear with higher frequency");
             Console.WriteLine(" in the training data will be randomly down-sampled; default is 0 (off), useful value is 1e-5");
             Console.WriteLine("\t-threads <int>");
-            Console.WriteLine("\t\tUse <int> threads (default 1)");
+            Console.WriteLine("\t\t<int>: the number of working threads (default 1)");
             Console.WriteLine("\t-min-count <int>");
-            Console.WriteLine("\t\tThis will discard words that appear less than <int> times; default is 5");
+            Console.WriteLine("\t\t<int>: discard words that appear less than <int> times; default is 5");
             Console.WriteLine("\t-alpha <float>");
-            Console.WriteLine("\t\tSet the starting learning rate; default is 0.025");
+            Console.WriteLine("\t\t<float>: the starting learning rate; default is 0.025");
             Console.WriteLine("\t-debug <int>");
-            Console.WriteLine("\t\tSet the debug mode 0/1");
+            Console.WriteLine("\t\t<int>: debug mode 0/1");
             Console.WriteLine("\t-cbow <int>");
-            Console.WriteLine("\t\tUse the continuous bag of words model or skip-gram model; default is 1 (continuous bag of words model)");
-            Console.WriteLine("\t-vocabfile <string>");
-            Console.WriteLine("\t\tSave vocabulary into file <string>");
+            Console.WriteLine("\t\t<int>: the continuous bag of words model or skip-gram model; default is 1 (continuous bag of words model)");
+            Console.WriteLine("\t-vocabfile <file>");
+            Console.WriteLine("\t\t<file>: vocabulary file");
             Console.WriteLine("\t-save-step <int>");
-            Console.WriteLine("\t\tSave model after every <int> words processed. it supports K, M and G for larger number");
+            Console.WriteLine("\t\t<int>: Save model after every <int> words processed. it supports K, M and G for larger number");
             Console.WriteLine("\t-iter <int>");
-            Console.WriteLine("\t\tRun more training iterations (default 5)");
-            //Console.WriteLine("\t-sentence-vectors <0/1>");
-            //Console.WriteLine("\t\tAssume the first token at the beginning of each line is a sentence ID. This token will be trained. Default is 0");
-            //Console.WriteLine("\t\twith full sentence context instead of just the window. Use 1 to trun on.");
+            Console.WriteLine("\t\t<int>: training iterations (default 5)");
             Console.WriteLine("\t-negative <int>");
-            Console.WriteLine("\t\tNumber of negative examples; default is 5, common value are 3 - 15");
+            Console.WriteLine("\t\t<int>: the number of negative examples; default is 5, common value are 3 - 15");
             Console.WriteLine("\t-pre-trained-modelfile <file>");
-            Console.WriteLine("\t\tUse <file> which is pre-trained-model file");
-            Console.WriteLine("\t-only-update-corpus-word <0/1>");
-            Console.WriteLine("\t\tUse 1 to only update corpus words, 0 to update all words");
+            Console.WriteLine("\t\t<file>: pre-trained-model for incremental training");
+            Console.WriteLine("\t-only-update-corpus-word <int>");
+            Console.WriteLine("\t\t<int>: 1 to only update corpus words, 0 to update all words");
             Console.WriteLine();
             Console.WriteLine("Examples:");
             Console.WriteLine("Training a model with corpus:");
@@ -414,13 +448,13 @@ namespace Txt2VecConsole
         private static void UsageDistance()
         {
             Console.WriteLine("Txt2VecConsole.exe -mode distance <...>");
-            Console.WriteLine("Parameters for calculating word similarity");
+            Console.WriteLine("Parameters to calculate words similarity");
             Console.WriteLine("\t-modelfile <file>");
-            Console.WriteLine("\t\tUse <file> to load encoded model");
+            Console.WriteLine("\t\t<file>: encoded model");
             Console.WriteLine("\t-maxword <int>");
-            Console.WriteLine("\t\t<int> is the number of closest words that will be shown");
+            Console.WriteLine("\t\t<int>: the number of closest words that will be shown");
             Console.WriteLine("\t-txtmodel <int>");
-            Console.WriteLine("\t\tIndicate model format. Use 1 for text model, 0 for binary model. Default is 0");
+            Console.WriteLine("\t\t<int>: model format. 1 for text model, 0 for binary model. Default is 0");
         }
 
         private static void UsageAnalogy()
@@ -428,33 +462,43 @@ namespace Txt2VecConsole
             Console.WriteLine("Txt2VecConsole.exe -mode analogy <...>");
             Console.WriteLine("Parameters for word semantic analogy");
             Console.WriteLine("\t-modelfile <file>");
-            Console.WriteLine("\t\tUse <file> to load encoded model");
+            Console.WriteLine("\t\t<file>: encoded model");
             Console.WriteLine("\t-maxword <int>");
-            Console.WriteLine("\t\t<int> is the number of closest words that will be shown");
+            Console.WriteLine("\t\t<int>: the number of closest words that will be shown");
             Console.WriteLine("\t-txtmodel <int>");
-            Console.WriteLine("\t\tIndicate model format. Use 1 for text model, 0 for binary model. Default is 0");
+            Console.WriteLine("\t\t<int>: model format. 1 for text model, 0 for binary model. Default is 0");
         }
 
         private static void UsageShrink()
         {
             Console.WriteLine("Txt2VecConsole.exe -mode shrink <...>");
-            Console.WriteLine("Parameters for shrinking down model");
+            Console.WriteLine("Parameters to shrink down model");
             Console.WriteLine("\t-modelfile <file>");
-            Console.WriteLine("\t\t<file> is the raw model for shrinking down");
+            Console.WriteLine("\t\t<file>: encoded model for shrinking down");
             Console.WriteLine("\t-newmodelfile <file>");
-            Console.WriteLine("\t\t<file> is for shrinked model");
+            Console.WriteLine("\t\t<file>: shrinked model");
             Console.WriteLine("\t-dictfile <file>");
-            Console.WriteLine("\t\t<file> if lexical dictionary whose items will be kept in shrinked model");
+            Console.WriteLine("\t\t<file>: vocabulary file for shrinked model");
         }
 
         private static void UsageDumpModel()
         {
             Console.WriteLine("Txt2VecConsole.exe -mode dump <...>");
-            Console.WriteLine("Parameters for dumping model to text format");
+            Console.WriteLine("Parameters to dump encoded model to text format");
             Console.WriteLine("\t-modelfile <file>");
-            Console.WriteLine("\t\t<file> is the model file for dumping");
+            Console.WriteLine("\t\t<file>: encoded model file");
             Console.WriteLine("\t-txtfile <file>");
-            Console.WriteLine("\t\t<file> is the text file that model dumped into");
+            Console.WriteLine("\t\t<file>: text file that encoded model dumped into");
+        }
+
+        private static void UsageVQModel()
+        {
+            Console.WriteLine("Txt2VecConsole.exe -mode buildvq <...>");
+            Console.WriteLine("Parameters to build vector quantization model");
+            Console.WriteLine("\t-modelfile <file>");
+            Console.WriteLine("\t\t<file>: encoded model file");
+            Console.WriteLine("\t-vqmodelfile <file>");
+            Console.WriteLine("\t\t<file>: vector quantization model");
         }
 
     }

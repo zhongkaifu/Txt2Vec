@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using AdvUtils;
 
 namespace Txt2Vec
 {
@@ -12,9 +13,9 @@ namespace Txt2Vec
         public void Run(string strModelFileName, string strNewModelFileName, string strDictFileName)
         {
             string strLine = null;
-         
+
             //Load lexical dictionary
-            Console.WriteLine("Load lexical dictionary...");
+            Logger.WriteLine("Load lexical dictionary...");
             StreamReader sr = new StreamReader(strDictFileName);
             HashSet<string> setTerm = new HashSet<string>();
             while ((strLine = sr.ReadLine()) != null)
@@ -26,12 +27,20 @@ namespace Txt2Vec
 
 
             //Load raw model
-            Console.WriteLine("Loading raw model...");
+            Logger.WriteLine("Loading raw model...");
             sr = new StreamReader(strModelFileName);
             BinaryReader br = new BinaryReader(sr.BaseStream);
 
             int words = br.ReadInt32();
             int size = br.ReadInt32();
+            int vqSize = br.ReadInt32();
+
+            Logger.WriteLine("vocabulary size: {0}, vector size: {1}, VQ size: {2}", words, size, vqSize);
+            if (vqSize != 0)
+            {
+                Logger.WriteLine(Logger.Level.err, "Currently, we don't support to shrink vector quantization model.");
+                return;
+            }
 
             Dictionary<string, int> vocab = new Dictionary<string, int>();
             Dictionary<int, string> rev_vocab = new Dictionary<int, string>();
@@ -63,12 +72,13 @@ namespace Txt2Vec
             sr.Close();
 
             //Save the shrinked model
-            Console.WriteLine("Saving shrinked model...");
+            Logger.WriteLine("Saving shrinked model...");
             StreamWriter sw = new StreamWriter(strNewModelFileName);
             BinaryWriter bw = new BinaryWriter(sw.BaseStream);
 
             bw.Write(newwords);
             bw.Write(size);
+            bw.Write(vqSize);
 
             for (int i = 0; i < newwords; i++)
             {
