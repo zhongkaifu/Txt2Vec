@@ -134,3 +134,6 @@ Txt2VecConsole.exe -mode buildvq <...>
  Parameters to build vector quantization model  
 **-modelfile** <file> : encoded model file for vector quantization  
 **-vqmodelfile** <file> : output vector quantized model  
+
+# Demo Package
+In release section, a Txt2VecConsole demo package is provided. It contains Txt2VecConsole.exe source code, binary files and two encoded models. Both of two models are word-to-vector models. One model is for Chinese and the other is for English. Please enjoy it and have fun! :)
