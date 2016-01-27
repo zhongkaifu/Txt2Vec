@@ -204,7 +204,7 @@ namespace Txt2Vec
                     continue;
                 }
                 
-                double[] vector = preTrainedModel.GetVector(strTerm);
+                float[] vector = preTrainedModel.GetVector(strTerm);
                 for (int i = 0; i < layer1_size;i++)
                 {
                     syn[i + wordId * layer1_size] = vector[i];

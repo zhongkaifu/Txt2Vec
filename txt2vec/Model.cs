@@ -11,7 +11,7 @@ namespace Txt2Vec
     public class Term
     {
         public string strTerm;
-        public double[] vector;
+        public float[] vector;
         public byte[] vectorVQ;
     }
 
@@ -99,10 +99,10 @@ namespace Txt2Vec
                 }
 
                 term.strTerm = items[0];
-                term.vector = new double[vSize];
+                term.vector = new float[vSize];
                 for (int i = 0; i < vSize; i++)
                 {
-                    term.vector[i] = double.Parse(items[i + 1]);
+                    term.vector[i] = float.Parse(items[i + 1]);
                 }
 
                 vectorSize = vSize;
@@ -114,7 +114,7 @@ namespace Txt2Vec
             sr.Close();
         }
 
-        public double[] GetVector(string strTerm)
+        public float[] GetVector(string strTerm)
         {
             if (term2vector.ContainsKey(strTerm) == true)
             {
@@ -124,7 +124,7 @@ namespace Txt2Vec
             return null;
         }
 
-        private double[] NormalizeVector(double[] vec)
+        private float[] NormalizeVector(float[] vec)
         {
             //Normalize the vector
             double len = 0;
@@ -135,7 +135,7 @@ namespace Txt2Vec
             len = Math.Sqrt(len);
             for (int a = 0; a < vectorSize; a++)
             {
-                vec[a] /= len;
+                vec[a] = (float)(vec[a] / len);
             }
 
             return vec;
@@ -176,7 +176,7 @@ namespace Txt2Vec
             {
                 Term term = new Term();
                 term.strTerm = br.ReadString();
-                term.vector = new double[vectorSize];
+                term.vector = new float[vectorSize];
                 if (codebooks != null)
                 {
                     term.vectorVQ = new byte[vectorSize];
@@ -195,7 +195,7 @@ namespace Txt2Vec
                     else
                     {
                         byte idx = br.ReadByte();
-                        term.vector[i] = codebooks[i][idx];
+                        term.vector[i] = (float)codebooks[i][idx];
                         term.vectorVQ[i] = idx;
                     }
                 }
