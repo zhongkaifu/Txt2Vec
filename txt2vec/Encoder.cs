@@ -289,6 +289,21 @@ namespace Txt2Vec
                 foreach (string item in items)
                 {
                     int wordId = SearchVocab(item);
+
+                    if (wordId == -1 && onlyUpdateCorpusWord == 0)
+                    {
+                        word2id.Add(item, vocab_size);
+                        wordId = vocab_size;
+
+                        vocab_word voc_word = new vocab_word();
+                        voc_word.word = item;
+                        voc_word.cnt = 0;
+                        voc_word.source = WORD_SOURCE.CORPUS;
+
+                        vocab.Add(voc_word);
+                        vocab_size++;
+                    }
+
                     if (wordId >= 0)
                     {
                         vocab[wordId].cnt++;
